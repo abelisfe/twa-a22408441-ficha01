@@ -1,0 +1,58 @@
+{
+  "count": 8,
+  "total": 303.93,
+  "categories": [
+    "acao",
+    "desporto",
+    "rpg",
+    "sandbox",
+    "simulacao"
+  ],
+  "top3": [
+    {
+      "id": 3,
+      "name": "EA Sports FC 26",
+      "category": "desporto",
+      "price": 69.99,
+      "tags": [
+        "futebol",
+        "simulacao",
+        "multiplayer"
+      ],
+      "developer": {
+        "name": "EA Vancouver",
+        "country": "Canada"
+      }
+    },
+    {
+      "id": 6,
+      "name": "Red Dead Redemption 2",
+      "category": "acao",
+      "price": 59.99,
+      "tags": [
+        "aventura",
+        "mundo aberto",
+        "western"
+      ],
+      "developer": {
+        "name": "Rockstar Games",
+        "country": "Estados Unidos"
+      }
+    },
+    {
+      "id": 8,
+      "name": "Hogwarts Legacy",
+      "category": "rpg",
+      "price": 59.99,
+      "tags": [
+        "magia",
+        "fantasia",
+        "mundo aberto"
+      ],
+      "developer": {
+        "name": "Avalanche Software",
+        "country": "Estados Unidos"
+      }
+    }
+  ]
+}
