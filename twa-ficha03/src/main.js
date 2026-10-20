@@ -26,7 +26,7 @@ async function load() {
   render(state)
 
   try {
-    const res = await fetch('https://api.github.com/repos/nodejs/nope')
+    const res = await fetch('/items.json')
 
     if (!res.ok) {
       throw new Error(`Erro HTTP: ${res.status}`)
