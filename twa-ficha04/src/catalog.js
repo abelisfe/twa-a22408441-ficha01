@@ -2,8 +2,6 @@
 export const byCategory = (list, cat) =>
   list.filter((game) => game.category === cat)
 
-
-
 export const search = (list, text) =>
   list.filter((game) =>
     game.name.toLowerCase().includes(text.toLowerCase()) ||
@@ -12,20 +10,16 @@ export const search = (list, text) =>
     )
   )
 
-  
 export const total = (list) =>
   list.reduce((sum, game) => sum + game.price, 0)
 
-
 export const top = (list, n) =>
-  [...list]
-    .sort((a, b) => b.price - a.price)
+  list
+    .toSorted((a, b) => b.price - a.price)
     .slice(0, n)
 
-    
 export const categories = (list) =>
-  [...new Set(list.map((game) => game.category))].sort()
-
+  [...new Set(list.map((game) => game.category))].toSorted()
 
 export const withDiscount = (list, pct) =>
   list.map((game) => ({
@@ -33,9 +27,8 @@ export const withDiscount = (list, pct) =>
     price: game.price * (1 - pct / 100)
   }))
 
-
 export const sortByPrice = (list, dir) =>
-  [...list].sort((a, b) =>
+  list.toSorted((a, b) =>
     dir === 'asc'
       ? a.price - b.price
       : b.price - a.price

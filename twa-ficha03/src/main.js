@@ -19,6 +19,14 @@ const state = {
   selectedId: null
 }
 
+// Elementos da página
+const statusElement = document.querySelector('#status')
+const list = document.querySelector('#list')
+const detail = document.querySelector('#detail')
+const searchInput = document.querySelector('#search')
+const categorySelect = document.querySelector('#category')
+const sortButton = document.querySelector('#sort')
+
 // Carregar os jogos do ficheiro JSON
 async function load() {
   state.status = 'loading'
@@ -33,22 +41,6 @@ async function load() {
     }
 
     state.items = await res.json()
-
-    const select = document.querySelector('#category')
-    select.replaceChildren()
-
-    const allOption = document.createElement('option')
-    allOption.value = ''
-    allOption.textContent = 'Todas as categorias'
-    select.append(allOption)
-
-    categories(state.items).forEach(cat => {
-      const option = document.createElement('option')
-      option.value = cat
-      option.textContent = cat
-      select.append(option)
-    })
-
     state.status = 'ready'
 
   } catch (err) {
@@ -60,25 +52,45 @@ async function load() {
   }
 }
 
-// Atualizar a página
+// Atualizar toda a interface
 function render(state) {
-  const list = document.querySelector('#list')
-  const detail = document.querySelector('#detail')
-
+  statusElement.replaceChildren()
   list.replaceChildren()
   detail.replaceChildren()
 
+  // Atualizar o texto do botão
+  sortButton.textContent =
+    state.sortDir === 'desc'
+      ? 'Ordenar por preço: decrescente'
+      : 'Ordenar por preço: crescente'
+
+  // Atualizar as categorias
+  categorySelect.replaceChildren()
+
+  const allOption = document.createElement('option')
+  allOption.value = ''
+  allOption.textContent = 'Todas as categorias'
+  categorySelect.append(allOption)
+
+  categories(state.items).forEach(cat => {
+    const option = document.createElement('option')
+    option.value = cat
+    option.textContent = cat
+    categorySelect.append(option)
+  })
+
+  categorySelect.value = state.category
+
+  // Estado de carregamento
   if (state.status === 'loading') {
-    const message = document.createElement('li')
-    message.textContent = 'A carregar jogos...'
-    list.append(message)
+    statusElement.textContent = 'A carregar jogos...'
     return
   }
 
+  // Estado de erro
   if (state.status === 'error') {
-    const message = document.createElement('li')
-    message.textContent = `Erro ao carregar jogos: ${state.error}`
-    list.append(message)
+    statusElement.textContent =
+      `Erro ao carregar jogos: ${state.error}`
     return
   }
 
@@ -90,21 +102,33 @@ function render(state) {
   const filteredItems = search(categoryItems, state.query)
   const sortedItems = sortByPrice(filteredItems, state.sortDir)
 
-  // Mostrar a lista de jogos
+  // Mostrar quantidade de resultados
+  statusElement.textContent =
+    `${sortedItems.length} de ${state.items.length} jogos`
+
+  if (sortedItems.length === 0) {
+    statusElement.textContent = 'Nenhum jogo encontrado.'
+  }
+
+  // Construir a lista de jogos
   sortedItems.forEach(game => {
     const li = document.createElement('li')
-    li.textContent = `${game.name} - ${game.price.toFixed(2)} €`
+
+    li.textContent =
+      `${game.name} - ${game.price.toFixed(2)} €`
+
+    // Identificador utilizado na delegação de eventos
+    li.dataset.id = game.id
     li.style.cursor = 'pointer'
 
-    li.addEventListener('click', () => {
-      state.selectedId = game.id
-      render(state)
-    })
+    if (game.id === state.selectedId) {
+      li.classList.add('selected')
+    }
 
     list.append(li)
   })
 
-  // Mostrar os detalhes do jogo selecionado
+  // Mostrar detalhes do jogo selecionado
   const selectedGame = state.items.find(
     game => game.id === state.selectedId
   )
@@ -114,13 +138,16 @@ function render(state) {
     title.textContent = selectedGame.name
 
     const price = document.createElement('p')
-    price.textContent = `Preço: ${selectedGame.price.toFixed(2)} €`
+    price.textContent =
+      `Preço: ${selectedGame.price.toFixed(2)} €`
 
     const category = document.createElement('p')
-    category.textContent = `Categoria: ${selectedGame.category}`
+    category.textContent =
+      `Categoria: ${selectedGame.category}`
 
     const tags = document.createElement('p')
-    tags.textContent = `Tags: ${selectedGame.tags.join(', ')}`
+    tags.textContent =
+      `Tags: ${selectedGame.tags.join(', ')}`
 
     const developer = document.createElement('p')
     developer.textContent =
@@ -130,29 +157,41 @@ function render(state) {
   }
 }
 
-// Botão para alterar a ordenação
-document.querySelector('#sort').addEventListener('click', () => {
-  state.sortDir = state.sortDir === 'desc' ? 'asc' : 'desc'
-  render(state)
+// Evento único na lista: delegação de eventos
+list.addEventListener('click', (event) => {
+  const li = event.target.closest('li[data-id]')
 
-  document.querySelector('#sort').textContent =
-    state.sortDir === 'desc'
-      ? 'Ordenar por preço: decrescente'
-      : 'Ordenar por preço: crescente'
+  if (!li || !list.contains(li)) {
+    return
+  }
+
+  const game = state.items.find(
+    item => String(item.id) === li.dataset.id
+  )
+
+  if (game) {
+    state.selectedId = game.id
+    render(state)
+  }
 })
 
-// Pesquisa de jogos
-document.querySelector('#search').addEventListener('input', (e) => {
-  state.query = e.target.value
+// Alterar a ordenação
+sortButton.addEventListener('click', () => {
+  state.sortDir = state.sortDir === 'desc' ? 'asc' : 'desc'
+  render(state)
+})
+
+// Pesquisar jogos
+searchInput.addEventListener('input', (event) => {
+  state.query = event.target.value
   render(state)
 })
 
 // Filtrar por categoria
-document.querySelector('#category').addEventListener('change', (e) => {
-  state.category = e.target.value
+categorySelect.addEventListener('change', (event) => {
+  state.category = event.target.value
   render(state)
 })
 
 // Iniciar a aplicação
 load()
-
